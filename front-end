@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculator</title>
+    <style>
+        /* CSS样式，用于布局和美化计算器界面 */
+    </style>
+</head>
+<body>
+    <h1>Calculator</h1>
+    <input type="text" id="expression" placeholder="Enter expression">
+    <table>
+        <tr>
+            <td><button onclick="addToExpression('7')">7</button></td>
+            <td><button onclick="addToExpression('8')">8</button></td>
+            <td><button onclick="addToExpression('9')">9</button></td>
+            <td><button onclick="addToExpression('/')">/</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="addToExpression('4')">4</button></td>
+            <td><button onclick="addToExpression('5')">5</button></td>
+            <td><button onclick="addToExpression('6')">6</button></td>
+            <td><button onclick="addToExpression('*')">*</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="addToExpression('1')">1</button></td>
+            <td><button onclick="addToExpression('2')">2</button></td>
+            <td><button onclick="addToExpression('3')">3</button></td>
+            <td><button onclick="addToExpression('-')">-</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="addToExpression('0')">0</button></td>
+            <td><button onclick="addToExpression('.')">.</button></td>
+            <td><button onclick="calculate()">=</button></td>
+            <td><button onclick="addToExpression('+')">+</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="addToExpression('%')">%</button></td>
+            <td colspan="3"><button onclick="calculateMod()">Calculate Mod</button></td>
+        </tr>
+    </table>
+    <div id="result"></div>
+    <h2>History</h2>
+    <ul id="history"></ul>
+
+    <script>
+        function addToExpression(value) {
+            document.getElementById('expression').value += value;
+        }
+
+        function calculate() {
+            var expression = document.getElementById('expression').value;
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'expression': expression })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = 'Result: ' + data.result;
+                document.getElementById('expression').value = '';
+                getHistory();
+            });
+        }
+
+        function calculateMod() {
+            var expression = document.getElementById('expression').value;
+            fetch('/calculate_mod', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'expression': expression })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = 'Result: ' + data.result;
+                document.getElementById('expression').value = '';
+                getHistory();
+            });
+        }
+
+        function getHistory() {
+            fetch('/history')
+            .then(response => response.json())
+            .then(data => {
+                var historyList = document.getElementById('history');
+                historyList.innerHTML = '';
+                data.history.forEach(result => {
+                    var li = document.createElement('li');
+                    li.innerText = result;
+                    historyList.appendChild(li);
+                });
+            });
+        }
+
+        getHistory();
+    </script>
+</body>
+</html>
