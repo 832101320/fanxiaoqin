@@ -1,0 +1,35 @@
+from flask import Flask, request, jsonify, render_template
+
+app = Flask(__name__)
+
+history = []
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    expression = request.json['expression']
+    result = eval(expression)
+    history.append(result)
+    if len(history) > 10:
+        history.pop(0)
+    return jsonify({'result': result})
+
+@app.route('/calculate_mod', methods=['POST'])
+def calculate_mod():
+    expression = request.json['expression']
+    operands = expression.split('%')
+    result = float(operands[0]) % float(operands[1])
+    history.append(result)
+    if len(history) > 10:
+        history.pop(0)
+    return jsonify({'result': result})
+
+@app.route('/history', methods=['GET'])
+def get_history():
+    return jsonify({'history': history})
+
+if __name__ == '__main__':
+    app.run()
